@@ -1,6 +1,7 @@
 
 var pageContentEl = document.querySelector("#quiz");
 var contentObjArray = [];
+var highscore = [];
 var answer = 0;
 var currentState = 0;
 var correctCount = 0;
@@ -72,15 +73,16 @@ var taskButtonHandler = async function(event) {
     if(!buttonActive){
         return false;
     }
+
     var targetEl = event.target;
     var choiceId = targetEl.getAttribute("choice-id");
     var endIndex = contentObjArray.length - 1;
 
-    // console.log(targetEl);
-    // console.log(choiceId);
     if(choiceId === null){
         return false;
     }
+
+    // check clicked choice
     if(targetEl.matches(".choice")){
         if(currentState != 0 && currentState != endIndex){
             if(choiceId == answer){
@@ -93,8 +95,16 @@ var taskButtonHandler = async function(event) {
             await new Promise(r => setTimeout(r, 2000));
             buttonActive = true;
         }
+        else if(currentState == endIndex){
+            var score = {
+                initial: document.querySelector("input[name='initial']").value,
+                score: correctCount
+            }
+            highscore.push(score);
+        }
     }
     
+    // change state
     if(currentState < endIndex){
         currentState++;
         if(currentState  == endIndex){
@@ -104,7 +114,6 @@ var taskButtonHandler = async function(event) {
     else{
         currentState = 0;
         correctCount = 0;
-
     }
     
     updatePage(contentObjArray[currentState]);
