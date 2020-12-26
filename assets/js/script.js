@@ -7,6 +7,23 @@ var currentState = 0;
 var correctCount = 0;
 var buttonActive = true;
 
+
+var saveScores = function() {
+    localStorage.setItem("code-quiz-highscore", JSON.stringify(highscore));
+}
+
+var loadScores = function(){
+    
+    var savedScores = localStorage.getItem("code-quiz-highscore");
+
+    if (!savedScores) {
+      return false;
+    }
+  
+    highscore = JSON.parse(savedScores);
+    
+}
+
 var removeElement = function (pageSectionEl, element){
     var selectedEl = pageSectionEl.querySelector(element);
     while(selectedEl !== null){
@@ -96,11 +113,20 @@ var taskButtonHandler = async function(event) {
             buttonActive = true;
         }
         else if(currentState == endIndex){
+            var initial_inputBox = document.querySelector("input[name='initial']").value
+
+            if(!initial_inputBox){
+                alert("Please enter initial.")
+                return false;
+            }
+
             var score = {
-                initial: document.querySelector("input[name='initial']").value,
+                initial: initial_inputBox,
                 score: correctCount
             }
+            
             highscore.push(score);
+            saveScores();
         }
     }
     
@@ -152,6 +178,7 @@ var addContents = function (){
     return contentObjArray;
 }
 
+loadScores();
 contentObjArray = addContents();
 updatePage(contentObjArray[currentState]);
 
