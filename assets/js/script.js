@@ -6,35 +6,43 @@ var currentState = 0;
 var correctCount = 0;
 var buttonActive = true;
 
+var removeElement = function (pageSectionEl, element){
+    var selectedEl = pageSectionEl.querySelector(element);
+    while(selectedEl !== null){
+        selectedEl.remove();
+        selectedEl = pageSectionEl.querySelector(element);
+    }
+}
 
 var updatePage = function(contentObj) {
     var pageSectionEl = document.querySelector("#quiz");
 
+    // remove previous addon elements
+    removeElement(pageSectionEl, "button");
+    removeElement(pageSectionEl, "#feedbackMessage");
+    removeElement(pageSectionEl, "input");
+
+    // update messages
     pageSectionEl.querySelector("h1").textContent = contentObj.h1;
     pageSectionEl.querySelector("h2").textContent = contentObj.h2;
 
-    var buttons = document.querySelector("button");
-    console.log(buttons);
-
-    // remove previous buttons
-    while(buttons !== null){
-        buttons.remove();
-        buttons = document.querySelector("button");
+    if(contentObj.inputField){
+        var initialBoxEl = document.createElement("input");
+        initialBoxEl.type = "text";
+        initialBoxEl.name = "initial";
+        initialBoxEl.placeholder = "Enter initial";
+    
+        pageContentEl.appendChild(initialBoxEl);
     }
 
-    var feedbackMessage = document.querySelector("#feedbackMessage");
-
-    if(feedbackMessage !== null){
-        feedbackMessage.remove();
-    }
- 
+    // add buttons of choices
     for(var i = 0; i < contentObj.choices.length; i++){
-        var editButtonEl = document.createElement("button");
-        editButtonEl.textContent = contentObj.choices[i];
-        editButtonEl.className = "choice";
-        editButtonEl.setAttribute("choice-id", i);
+        var buttonEl = document.createElement("button");
+        buttonEl.textContent = contentObj.choices[i];
+        buttonEl.className = "choice";
+        buttonEl.setAttribute("choice-id", i);
 
-        pageSectionEl.appendChild(editButtonEl);
+        pageSectionEl.appendChild(buttonEl);
     }
 
     answer = contentObj.answer;
@@ -85,7 +93,6 @@ var taskButtonHandler = async function(event) {
             await new Promise(r => setTimeout(r, 2000));
             buttonActive = true;
         }
-
     }
     
     if(currentState < endIndex){
@@ -97,10 +104,10 @@ var taskButtonHandler = async function(event) {
     else{
         currentState = 0;
         correctCount = 0;
+
     }
     
     updatePage(contentObjArray[currentState]);
-
 };
 
 var addContents = function (){
@@ -136,11 +143,7 @@ var addContents = function (){
     return contentObjArray;
 }
 
-var main = function (){
-    contentObjArray = addContents();
-    updatePage(contentObjArray[currentState]);
-}
-
-main();
+contentObjArray = addContents();
+updatePage(contentObjArray[currentState]);
 
 pageContentEl.addEventListener("click", taskButtonHandler);
