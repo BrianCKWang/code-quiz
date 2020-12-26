@@ -7,13 +7,62 @@ var currentState = 0;
 var correctCount = 0;
 var buttonActive = true;
 
+var addContents = function (){
+    var contentObjArray = [];
+
+    // main page
+    contentObjArray.push(contentObj = {
+        h1: "Quiz main page",
+        h2: "Are you ready???",
+        choices: ["Start"],
+        answer: 0,
+        inputField: false
+    });
+
+    // question 1
+    contentObjArray.push(contentObj = {
+        h1: "Question 1:",
+        h2: "Are you bastion?",
+        choices: ["beep", "boop"],
+        answer: 1,
+        inputField: false
+    });
+
+    // question 2
+    contentObjArray.push(contentObj = {
+        h1: "Question 2:",
+        h2: "Are you bastion?",
+        choices: ["beep", "boop"],
+        answer: 1,
+        inputField: false
+    });
+
+    // question 3
+    contentObjArray.push(contentObj = {
+        h1: "Question 3:",
+        h2: "Are you bastion?",
+        choices: ["beep", "boop"],
+        answer: 1,
+        inputField: false
+    });
+
+    // finish page
+    contentObjArray.push(contentObj = {
+        h1: "Finish",
+        h2: "Please enter initial",
+        choices: ["Submit"],
+        answer: 0,
+        inputField: true
+    });
+
+    return contentObjArray;
+}
 
 var saveScores = function() {
     localStorage.setItem("code-quiz-highscore", JSON.stringify(highscore));
 }
 
 var loadScores = function(){
-    
     var savedScores = localStorage.getItem("code-quiz-highscore");
 
     if (!savedScores) {
@@ -21,7 +70,6 @@ var loadScores = function(){
     }
   
     highscore = JSON.parse(savedScores);
-    
 }
 
 var removeElement = function (pageSectionEl, element){
@@ -74,11 +122,9 @@ var updateFeedback = function(feedback) {
     if(feedback){
         correctCount++;
         feedbackParagraphEl.textContent = "Correct";
-        // alert("Correct");
     }
     else{
         feedbackParagraphEl.textContent = "Wrong";
-        // alert("Wrong");
     }
 
     pageContentEl.appendChild(feedbackParagraphEl);
@@ -124,7 +170,7 @@ var taskButtonHandler = async function(event) {
                 initial: initial_inputBox,
                 score: correctCount
             }
-            
+
             highscore.push(score);
             saveScores();
         }
@@ -144,39 +190,6 @@ var taskButtonHandler = async function(event) {
     
     updatePage(contentObjArray[currentState]);
 };
-
-var addContents = function (){
-    var contentObjArray = [];
-
-    // main page
-    contentObjArray.push(contentObj = {
-        h1: "Quiz main page",
-        h2: "Are you ready???",
-        choices: ["Start"],
-        answer: 0,
-        inputField: false
-    });
-
-    // question 1
-    contentObjArray.push(contentObj = {
-        h1: "Question 1:",
-        h2: "Are you bastion?",
-        choices: ["beep", "boop"],
-        answer: 1,
-        inputField: false
-    });
-
-    // finish page
-    contentObjArray.push(contentObj = {
-        h1: "Finish",
-        h2: "Please enter initial",
-        choices: ["Submit"],
-        answer: 0,
-        inputField: true
-    });
-
-    return contentObjArray;
-}
 
 loadScores();
 contentObjArray = addContents();
