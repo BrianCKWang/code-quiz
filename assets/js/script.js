@@ -1,11 +1,15 @@
 
-var pageContentEl = document.querySelector("#quiz");
+var highscoreContentEl = document.querySelector("#highscore");
+var quizContentEl = document.querySelector("#quiz");
+var timerContentEl = document.querySelector("#timer");
 var contentObjArray = [];
 var highscore = [];
 var answer = 0;
 var currentState = 0;
 var correctCount = 0;
 var buttonActive = true;
+var timeRemaining = 0;
+var myTimer;
 
 var addContents = function (){
     var contentObjArray = [];
@@ -98,7 +102,7 @@ var updatePage = function(contentObj) {
         initialBoxEl.name = "initial";
         initialBoxEl.placeholder = "Enter initial";
     
-        pageContentEl.appendChild(initialBoxEl);
+        quizContentEl.appendChild(initialBoxEl);
     }
 
     // add buttons of choices
@@ -127,11 +131,11 @@ var updateFeedback = function(feedback) {
         feedbackParagraphEl.textContent = "Wrong";
     }
 
-    pageContentEl.appendChild(feedbackParagraphEl);
+    quizContentEl.appendChild(feedbackParagraphEl);
 }
 
-var taskButtonHandler = async function(event) {
-    debugger;
+var buttonClickHandler = async function(event) {
+    // debugger;
     
     if(!buttonActive){
         return false;
@@ -147,18 +151,27 @@ var taskButtonHandler = async function(event) {
 
     // check clicked choice
     if(targetEl.matches(".choice")){
-        if(currentState != 0 && currentState != endIndex){
+        if(currentState == 0){
+            startTimer();
+        }
+        else if(currentState != 0 && currentState != endIndex){
             if(choiceId == answer){
                 updateFeedback(true);
             }
             else{
                 updateFeedback(false);
             }
+
+            if(currentState == endIndex - 1){
+                clearInterval(myTimer);
+            }
+
             buttonActive = false;
             await new Promise(r => setTimeout(r, 2000));
             buttonActive = true;
         }
         else if(currentState == endIndex){
+            
             var initial_inputBox = document.querySelector("input[name='initial']").value
 
             if(!initial_inputBox){
@@ -170,6 +183,8 @@ var taskButtonHandler = async function(event) {
                 initial: initial_inputBox,
                 score: correctCount
             }
+
+            timerContentEl.querySelector("#timer-value").textContent = "-:--";
 
             highscore.push(score);
             saveScores();
@@ -191,8 +206,41 @@ var taskButtonHandler = async function(event) {
     updatePage(contentObjArray[currentState]);
 };
 
+var timerValueText = function () {
+    var minute = Math.floor(timeRemaining / 60);
+    var seconds = timeRemaining % 60;
+
+    return minute + ":" + (seconds < 10?"0":"") + seconds;;
+}
+
+var updateTimer = function () {
+    timeRemaining -= 1;
+    timerContentEl.querySelector("#timer-value").textContent = timerValueText();
+}
+
+var timerCheck = function () {
+    if(timeRemaining == 0){
+        clearInterval(myTimer);
+        currentState = contentObjArray.length - 1;
+        contentObjArray[currentState].h2 = "Timer is up. You answered " + correctCount + " out of " + (currentState - 1) + " questions correct. Please enter initial.";
+        updatePage(contentObjArray[currentState]);
+    }
+}
+
+var timerHandle = function () {
+    updateTimer(); 
+    timerCheck();
+}
+
+var startTimer =  function () {
+    var multiplier = 5;    // seconds
+    timeRemaining = (contentObjArray.length - 2) * multiplier;
+    timerContentEl.querySelector("#timer-value").textContent = timerValueText();
+    myTimer = setInterval(timerHandle, 1000);
+}
+
 loadScores();
 contentObjArray = addContents();
-updatePage(contentObjArray[currentState]);
+updatePage(contentObjArray[0]);
 
-pageContentEl.addEventListener("click", taskButtonHandler);
+quizContentEl.addEventListener("click", buttonClickHandler);
