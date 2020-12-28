@@ -62,7 +62,7 @@ var addContents = function (){
     return contentObjArray;
 }
 
-var saveScores = function() {
+var saveScoresToLocal = function() {
     localStorage.setItem("code-quiz-highscore", JSON.stringify(highscore));
 }
 
@@ -100,9 +100,11 @@ var updatePage = function(contentObj) {
         var initialBoxEl = document.createElement("input");
         initialBoxEl.type = "text";
         initialBoxEl.name = "initial";
+        initialBoxEl.id = "initial-input"
         initialBoxEl.placeholder = "Enter initial";
     
         quizContentEl.appendChild(initialBoxEl);
+        document.getElementById("initial-input").focus();
     }
 
     // add buttons of choices
@@ -132,6 +134,66 @@ var updateFeedback = function(feedback) {
     }
 
     quizContentEl.appendChild(feedbackParagraphEl);
+}
+
+var saveHighscore = function () {
+    // debugger;
+
+    var initial_inputBox = document.querySelector("input[name='initial']").value
+
+    if(!initial_inputBox){
+        alert("Please enter initial.")
+        return false;
+    }
+
+    var currentAttempt = {
+        timeStamp: Date.now(),
+        initial: initial_inputBox,
+        score: correctCount
+    }
+
+    if(highscore.length == 0){
+        highscore.push(currentAttempt);
+    }
+    else{
+        for(var i = 0; i <= highscore.length; i++){
+             // push score when reaching the end
+            if(i == highscore.length){ 
+                highscore.push(currentAttempt);
+                break;
+            }
+            // splice score if lower score in middle is found
+            else if(highscore[i].score < currentAttempt.score){ 
+                highscore.splice(i, 0, currentAttempt);
+                break;
+            }
+            // splice score if same score is found and timestamp is larger
+            else if(highscore[i].score == currentAttempt.score && highscore[i].timeStamp > currentAttempt.timeStamp){   
+                highscore.splice(i, 0, currentAttempt);
+                break;
+            }
+        }
+    }
+
+    // maintain maximum highscore list length
+    if(highscore.length > 10){
+        highscore.pop();
+    }
+
+    saveScoresToLocal();
+}
+
+var updateHighscoreTable = function () {
+    debugger;
+    removeElement(highscoreContentEl, ".highscore-item");
+
+    for(var i = 0; i < highscore.length; i++){
+        var highscoreItemEl = document.createElement("p");
+        var place = i + 1;
+        highscoreItemEl.textContent = place + " - " + highscore[i].initial + ": " + highscore[i].score;
+        highscoreItemEl.className = "highscore-item";
+        highscoreContentEl.appendChild(highscoreItemEl);
+    }
 }
 
 var buttonClickHandler = async function(event) {
@@ -167,27 +229,13 @@ var buttonClickHandler = async function(event) {
             }
 
             buttonActive = false;
-            await new Promise(r => setTimeout(r, 2000));
+            await new Promise(r => setTimeout(r, 1000));
             buttonActive = true;
         }
         else if(currentState == endIndex){
-            
-            var initial_inputBox = document.querySelector("input[name='initial']").value
-
-            if(!initial_inputBox){
-                alert("Please enter initial.")
-                return false;
-            }
-
-            var score = {
-                initial: initial_inputBox,
-                score: correctCount
-            }
-
             timerContentEl.querySelector("#timer-value").textContent = "-:--";
-
-            highscore.push(score);
-            saveScores();
+            saveHighscore();
+            updateHighscoreTable();
         }
     }
     
@@ -239,7 +287,11 @@ var startTimer =  function () {
     myTimer = setInterval(timerHandle, 1000);
 }
 
+// localStorage.clear("code-quiz-highscore");
 loadScores();
+removeElement(highscoreContentEl, "highscore-item");
+updateHighscoreTable();
+
 contentObjArray = addContents();
 updatePage(contentObjArray[0]);
 
