@@ -196,7 +196,7 @@ var updateHighscoreTable = function () {
     }
 }
 
-var buttonClickHandler = async function(event) {
+var quizButtonClickHandler = async function(event) {
     // debugger;
     
     if(!buttonActive){
@@ -239,6 +239,7 @@ var buttonClickHandler = async function(event) {
         }
     }
     
+    
     // change state
     if(currentState < endIndex){
         currentState++;
@@ -253,6 +254,18 @@ var buttonClickHandler = async function(event) {
     
     updatePage(contentObjArray[currentState]);
 };
+
+var highscoreButtonClickHandler = function(event){
+    var targetEl = event.target;
+
+    if(targetEl.matches("#clear-highscore")){
+        if(confirm('This will delete all history of highscores. Confirm?')){
+            highscore = [];
+            localStorage.clear("code-quiz-highscore");
+            updateHighscoreTable();
+        }
+    }
+}
 
 var timerValueText = function () {
     var minute = Math.floor(timeRemaining / 60);
@@ -287,7 +300,7 @@ var startTimer =  function () {
     myTimer = setInterval(timerHandle, 1000);
 }
 
-// localStorage.clear("code-quiz-highscore");
+
 loadScores();
 removeElement(highscoreContentEl, "highscore-item");
 updateHighscoreTable();
@@ -295,4 +308,5 @@ updateHighscoreTable();
 contentObjArray = addContents();
 updatePage(contentObjArray[0]);
 
-quizContentEl.addEventListener("click", buttonClickHandler);
+quizContentEl.addEventListener("click", quizButtonClickHandler);
+highscoreContentEl.addEventListener("click", highscoreButtonClickHandler);
