@@ -3,6 +3,7 @@ var highscoreContentEl = document.querySelector("#highscore");
 var quizContentEl = document.querySelector("#quiz");
 var timerContentEl = document.querySelector("#timer");
 var contentObjArray = [];
+var endIndex = 0;
 var highscore = [];
 var answer = 0;
 var currentState = 0;
@@ -195,6 +196,7 @@ var saveHighscore = function () {
     }
 
     saveScoresToLocal();
+    return true;
 }
 
 var updateHighscoreTable = function () {
@@ -210,8 +212,55 @@ var updateHighscoreTable = function () {
     }
 }
 
+var validateChoice = function (choiceId) {
+    if(choiceId == answer){
+        updateFeedback(true);
+    }
+    else{
+        updateFeedback(false);
+        timeRemaining -= quizTimeMultiplier;
+        updateTimer();
+    }
+}
 
+var stopTimerWhenFinished = function () {
+    if(currentState == endIndex - 1){
+        clearInterval(myTimer);
+    }
+}
 
+var displayEndMessage = function (){
+    contentObjArray[currentState].h2 = "You answered " 
+    + correctCount 
+    + " out of " 
+    + (endIndex - 1) 
+    + " questions correct. Please enter initial.";
+}
+
+var resetQuiz = function () {
+    currentState = 0;
+    correctCount = 0;
+}
+
+var finishQuiz = function () {
+    timerContentEl.querySelector("#timer-value").textContent = "-:--";
+    var scoreSaved = saveHighscore();
+    updateHighscoreTable();
+    
+    return scoreSaved;
+}
+
+var changeState = function() {
+    if(currentState < endIndex){
+        currentState++;
+        if(currentState  == endIndex){
+            displayEndMessage();
+        }
+    }
+    else{
+        resetQuiz();
+    }
+}
 var quizButtonClickHandler = async function(event) {
     debugger;
     
@@ -221,7 +270,7 @@ var quizButtonClickHandler = async function(event) {
 
     var targetEl = event.target;
     var choiceId = targetEl.getAttribute("choice-id");
-    var endIndex = contentObjArray.length - 1;
+    // var endIndex = contentObjArray.length - 1;
 
     if(choiceId === null){
         return false;
@@ -231,49 +280,38 @@ var quizButtonClickHandler = async function(event) {
     if(targetEl.matches(".choice")){
         if(currentState == 0){
             startTimer();
+            changeState();
+            updatePage(contentObjArray[currentState]);
         }
         else if(currentState != 0 && currentState != endIndex){
-            if(choiceId == answer){
-                updateFeedback(true);
-            }
-            else{
-                updateFeedback(false);
-                timeRemaining -= quizTimeMultiplier;
-                updateTimer();
-            }
-
-            if(currentState == endIndex - 1){
-                clearInterval(myTimer);
-            }
-
+            validateChoice(choiceId);
+            stopTimerWhenFinished(endIndex);
+            
             buttonActive = false;
             await new Promise(r => setTimeout(r, 1500));
             buttonActive = true;
+
+            changeState();
+            updatePage(contentObjArray[currentState]);
         }
         else if(currentState == endIndex){
-            timerContentEl.querySelector("#timer-value").textContent = "-:--";
-            saveHighscore();
-            updateHighscoreTable();
+            if(finishQuiz()){
+                changeState();
+                updatePage(contentObjArray[currentState]);
+            }
         }
     }
- 
-    // change state
-    if(currentState < endIndex){
-        currentState++;
-        if(currentState  == endIndex){
-            contentObjArray[currentState].h2 = "You answered " 
-            + correctCount 
-            + " out of " 
-            + (endIndex - 1) 
-            + " questions correct. Please enter initial.";
+}
+
+var submitHandler = function () {
+    debugger;
+    event.preventDefault();
+    if(currentState == endIndex){
+        if(finishQuiz()){
+            changeState();
+            updatePage(contentObjArray[currentState]);
         }
     }
-    else{
-        currentState = 0;
-        correctCount = 0;
-    }
-    
-    updatePage(contentObjArray[currentState]);
 }
 
 var highscoreButtonClickHandler = function(event){
@@ -324,9 +362,10 @@ var startTimer =  function () {
 loadScoresFromLocal();
 updateHighscoreTable();
 addContents();
+endIndex = contentObjArray.length - 1;
 updatePage(contentObjArray[0]); // show quiz start page
 
 // event listeners
 quizContentEl.addEventListener("click", quizButtonClickHandler);
-quizContentEl.addEventListener("submit", quizButtonClickHandler);
+quizContentEl.addEventListener("submit", submitHandler);
 highscoreContentEl.addEventListener("click", highscoreButtonClickHandler);
