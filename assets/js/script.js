@@ -10,6 +10,7 @@ var correctCount = 0;
 var buttonActive = true;
 var timeRemaining = 0;
 var myTimer;
+var quizTimeMultiplier = 30;    // seconds
 
 /**
  * To add questions, 
@@ -197,7 +198,7 @@ var saveHighscore = function () {
 }
 
 var updateHighscoreTable = function () {
-    debugger;
+    // debugger;
     removeElement(highscoreContentEl, ".highscore-item");
 
     for(var i = 0; i < highscore.length; i++){
@@ -209,8 +210,10 @@ var updateHighscoreTable = function () {
     }
 }
 
+
+
 var quizButtonClickHandler = async function(event) {
-    // debugger;
+    debugger;
     
     if(!buttonActive){
         return false;
@@ -235,6 +238,8 @@ var quizButtonClickHandler = async function(event) {
             }
             else{
                 updateFeedback(false);
+                timeRemaining -= quizTimeMultiplier;
+                updateTimer();
             }
 
             if(currentState == endIndex - 1){
@@ -251,13 +256,16 @@ var quizButtonClickHandler = async function(event) {
             updateHighscoreTable();
         }
     }
-    
-    
+ 
     // change state
     if(currentState < endIndex){
         currentState++;
         if(currentState  == endIndex){
-            contentObjArray[currentState].h2 = "You answered " + correctCount + " out of " + (endIndex - 1) + " questions correct. Please enter initial.";
+            contentObjArray[currentState].h2 = "You answered " 
+            + correctCount 
+            + " out of " 
+            + (endIndex - 1) 
+            + " questions correct. Please enter initial.";
         }
     }
     else{
@@ -266,7 +274,7 @@ var quizButtonClickHandler = async function(event) {
     }
     
     updatePage(contentObjArray[currentState]);
-};
+}
 
 var highscoreButtonClickHandler = function(event){
     var targetEl = event.target;
@@ -281,14 +289,14 @@ var highscoreButtonClickHandler = function(event){
 }
 
 var timerValueText = function () {
+    timeRemaining = timeRemaining < 0 ? 0 : timeRemaining; 
     var minute = Math.floor(timeRemaining / 60);
     var seconds = timeRemaining % 60;
 
-    return minute + ":" + (seconds < 10?"0":"") + seconds;
+    return minute + ":" + (seconds < 10 ? "0" : "") + seconds;
 }
 
 var updateTimer = function () {
-    timeRemaining -= 1;
     timerContentEl.querySelector("#timer-value").textContent = timerValueText();
 }
 
@@ -302,13 +310,13 @@ var timerCheck = function () {
 }
 
 var timerHandle = function () {
+    timeRemaining -= 1;
     updateTimer(); 
     timerCheck();
 }
 
 var startTimer =  function () {
-    var multiplier = 30;    // seconds
-    timeRemaining = (contentObjArray.length - 2) * multiplier;
+    timeRemaining = (contentObjArray.length - 2) * quizTimeMultiplier;
     timerContentEl.querySelector("#timer-value").textContent = timerValueText();
     myTimer = setInterval(timerHandle, 1000);
 }
