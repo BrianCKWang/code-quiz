@@ -11,8 +11,18 @@ var buttonActive = true;
 var timeRemaining = 0;
 var myTimer;
 
+/**
+ * To add questions, 
+ * 1. copy object, 
+ * 2. change title in h1, 
+ * 3. change question in h2, 
+ * 4. add answers, 
+ * 5. and update answer index. 
+ * 
+ * Leave inputField false.
+ */
 var addContents = function (){
-    var contentObjArray = [];
+    contentObjArray = [];
 
     // main page
     contentObjArray.push(contentObj = {
@@ -59,14 +69,13 @@ var addContents = function (){
         inputField: true
     });
 
-    return contentObjArray;
 }
 
 var saveScoresToLocal = function() {
     localStorage.setItem("code-quiz-highscore", JSON.stringify(highscore));
 }
 
-var loadScores = function(){
+var loadScoresFromLocal = function(){
     var savedScores = localStorage.getItem("code-quiz-highscore");
 
     if (!savedScores) {
@@ -96,14 +105,19 @@ var updatePage = function(contentObj) {
     pageSectionEl.querySelector("h1").textContent = contentObj.h1;
     pageSectionEl.querySelector("h2").textContent = contentObj.h2;
 
+    // add input field
     if(contentObj.inputField){
+        var formEl = document.createElement("form");
+        formEl.action = "";
+        formEl.id = "initial-form";
         var initialBoxEl = document.createElement("input");
         initialBoxEl.type = "text";
         initialBoxEl.name = "initial";
         initialBoxEl.id = "initial-input"
         initialBoxEl.placeholder = "Enter initial";
     
-        quizContentEl.appendChild(initialBoxEl);
+        formEl.appendChild(initialBoxEl);
+        quizContentEl.appendChild(formEl);
         document.getElementById("initial-input").focus();
     }
 
@@ -118,7 +132,6 @@ var updatePage = function(contentObj) {
     }
 
     answer = contentObj.answer;
-    // console.log(pageSectionEl);
 }
 
 var updateFeedback = function(feedback) {
@@ -229,7 +242,7 @@ var quizButtonClickHandler = async function(event) {
             }
 
             buttonActive = false;
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 1500));
             buttonActive = true;
         }
         else if(currentState == endIndex){
@@ -271,7 +284,7 @@ var timerValueText = function () {
     var minute = Math.floor(timeRemaining / 60);
     var seconds = timeRemaining % 60;
 
-    return minute + ":" + (seconds < 10?"0":"") + seconds;;
+    return minute + ":" + (seconds < 10?"0":"") + seconds;
 }
 
 var updateTimer = function () {
@@ -294,19 +307,18 @@ var timerHandle = function () {
 }
 
 var startTimer =  function () {
-    var multiplier = 5;    // seconds
+    var multiplier = 30;    // seconds
     timeRemaining = (contentObjArray.length - 2) * multiplier;
     timerContentEl.querySelector("#timer-value").textContent = timerValueText();
     myTimer = setInterval(timerHandle, 1000);
 }
 
-
-loadScores();
-removeElement(highscoreContentEl, "highscore-item");
+loadScoresFromLocal();
 updateHighscoreTable();
+addContents();
+updatePage(contentObjArray[0]); // show quiz start page
 
-contentObjArray = addContents();
-updatePage(contentObjArray[0]);
-
+// event listeners
 quizContentEl.addEventListener("click", quizButtonClickHandler);
+quizContentEl.addEventListener("submit", quizButtonClickHandler);
 highscoreContentEl.addEventListener("click", highscoreButtonClickHandler);
