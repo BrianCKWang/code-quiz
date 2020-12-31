@@ -3,10 +3,10 @@
 }
 
 :root {
-    --primary: #44e9ff;
-    --secondary: #497980;
-    --tertiary: rgb(192, 246, 253);
-    --background:  #0000008a;
+    --primary: #7b1fc5;
+    --secondary: #b370f1;
+    --tertiary: rgb(138, 102, 158);
+    --background:  #ffffff6c;
     --grey: #333;
     --primary-boarder-radius: 5px;
     /* font-size: 62.5%; */
@@ -14,7 +14,7 @@
   
   body {
     background: var(--background);
-    color: var(--grey);
+    color: black;
     margin: 0;
     /* padding: 0; */
     /* display: flex; */
@@ -34,21 +34,48 @@
 
 .item {
     border-style: solid;
-    border-width: 3px;
+    border-width: 0px;
     border-color: var(--secondary-color);
     padding: 10px 20px;
 }
 
+.btn {
+    outline: none;
+    border: none;
+    display: inline-block;
+    padding: 10px 15px;
+    background: var(--primary);
+    font-size: 1.5rem;
+    border-radius: var(--primary-boarder-radius);
+    position: relative;
+    top: -3px;
+    box-shadow: 0 3px var(--grey);
+    min-width: 150px;
+    color: white;
+}
+
+.btn:hover {
+    box-shadow: 0 2px var(--grey);
+    background: var(--secondary);
+    top: -2px;
+}
+
 #highscore {
-    width: 15%;
+    width: 20%;
 }
 
 #quiz {
-    width: 70%;
+    width: 60%;
     flex-grow: 8;
 }
 
 #timer {
-    width: 15%;
+    width: 20%;
     flex-grow: 8;
+}
+
+#feedbackMessage {
+    border-style: solid;
+    border-width: 3px 0px 0px 0px;
+    font-size: 1.5rem;
 }

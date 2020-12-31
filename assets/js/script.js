@@ -45,8 +45,8 @@ var addContents = function (){
 
     contentObjArray.push(contentObj = {
         h1: "",
-        h2: "Which one is not a JavaScript date type?",
-        answerPair: [["header", true], ["Number", false], ["boolean", false], ["String", false]],
+        h2: "Which one is not a JavaScript data type?",
+        answerPair: [["Header", true], ["Number", false], ["Boolean", false], ["String", false]],
         inputField: false
     });
 
@@ -67,7 +67,7 @@ var addContents = function (){
     contentObjArray.push(contentObj = {
         h1: "",
         h2: "What is the result of 4+3+\"7\"",
-        answerPair: [["77", true], ["14", false], ["17", false], ["437", false]],
+        answerPair: [["77", true], ["14", false], ["17", false], ["437", false], ["9000", false]],
         inputField: false
     });
 }
@@ -77,7 +77,7 @@ var addStartAndEndPage = function() {
     contentObjArray.unshift(contentObj = {
         h1: "Quiz main page",
         h2: "Are you ready???",
-        answerPair: [["start", true]],
+        answerPair: [["Start", true]],
         inputField: false
     });
 
@@ -147,7 +147,7 @@ var updatePage = function(contentObj) {
     var pageSectionEl = document.querySelector("#quiz");
 
     // remove previous addon elements
-    removeElement(pageSectionEl, "button");
+    removeElement(pageSectionEl, ".p-btn");
     removeElement(pageSectionEl, "#feedbackMessage");
     removeElement(pageSectionEl, "input");
 
@@ -178,12 +178,15 @@ var updatePage = function(contentObj) {
 
     // add buttons of choices
     for(var i = 0; i < contentObj.answerPair.length; i++){
+        var pEl = document.createElement("p");
+        pEl.className = "p-btn"
         var buttonEl = document.createElement("button");
         buttonEl.textContent = contentObj.answerPair[i][0];
-        buttonEl.className = "choice";
+        buttonEl.className = "choice btn";
         buttonEl.setAttribute("choice-id", i);
 
-        pageSectionEl.appendChild(buttonEl);
+        pEl.appendChild(buttonEl);
+        pageSectionEl.appendChild(pEl);
 
         if(contentObj.answerPair[i][1] == true){
             answer = i;
@@ -214,6 +217,10 @@ var saveHighscore = function () {
 
     if(!initial_inputBox){
         alert("Please enter initial.")
+        return false;
+    }
+    else if(initial_inputBox.length > 15){
+        alert("Please enter initial in shorter format.")
         return false;
     }
 
@@ -355,7 +362,6 @@ var quizButtonClickHandler = async function(event) {
             startTimer();
             changeState();
             updatePage(contentObjArray[currentState]);
-            questionCounter++;
         }
         else if(currentState != 0 && currentState != endIndex){
             validateChoice(choiceId);
