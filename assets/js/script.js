@@ -219,7 +219,7 @@ var saveHighscore = function () {
         alert("Please enter initial.")
         return false;
     }
-    else if(initial_inputBox.length > 15){
+    else if(initial_inputBox.length > 10){
         alert("Please enter initial in shorter format.")
         return false;
     }
