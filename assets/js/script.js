@@ -3,6 +3,7 @@ var highscoreContentEl = document.querySelector("#highscore");
 var quizContentEl = document.querySelector("#quiz");
 var timerContentEl = document.querySelector("#timer");
 var contentObjArray = [];
+var questionTotalCount = 0;
 var endIndex = 0;
 var highscore = [];
 var answer = 0;
@@ -11,54 +12,51 @@ var correctCount = 0;
 var buttonActive = true;
 var timeRemaining = 0;
 var myTimer;
+var totalTimeUsed = 0;
+
+// settings
 var quizTimeMultiplier = 30;    // seconds
 
 /**
  * To add questions, 
  * 1. copy object, 
- * 2. change title in h1, 
+ * 2. Leave h1 blank, 
  * 3. change question in h2, 
- * 4. add answers, 
- * 5. and update answer index. 
+ * 4. add answers in answerPair, mark the answer to true. Only one answer true allowed
  * 
  * Leave inputField false.
  */
 var addContents = function (){
     contentObjArray = [];
 
-    // main page
     contentObjArray.push(contentObj = {
+        h1: "",
+        h2: "Value in a variable cannot be changed.",
+        answerPair: [["False", true], ["True", false]],
+        inputField: false
+    });
+
+    contentObjArray.push(contentObj = {
+        h1: "",
+        h2: "Value in a variable cannot be changed.",
+        answerPair: [["False", true], ["True", false]],
+        inputField: false
+    });
+    
+    contentObjArray.push(contentObj = {
+        h1: "",
+        h2: "Value in a variable cannot be changed.",
+        answerPair: [["False", true], ["True", false]],
+        inputField: false
+    });
+}
+
+var addStartAndEndPage = function() {
+    // main page
+    contentObjArray.unshift(contentObj = {
         h1: "Quiz main page",
         h2: "Are you ready???",
-        choices: ["Start"],
-        answer: 0,
-        inputField: false
-    });
-
-    // question 1
-    contentObjArray.push(contentObj = {
-        h1: "Question 1:",
-        h2: "Are you bastion?",
-        choices: ["beep", "boop"],
-        answer: 1,
-        inputField: false
-    });
-
-    // question 2
-    contentObjArray.push(contentObj = {
-        h1: "Question 2:",
-        h2: "Are you bastion?",
-        choices: ["beep", "boop"],
-        answer: 1,
-        inputField: false
-    });
-
-    // question 3
-    contentObjArray.push(contentObj = {
-        h1: "Question 3:",
-        h2: "Are you bastion?",
-        choices: ["beep", "boop"],
-        answer: 1,
+        answerPair: [["start", true]],
         inputField: false
     });
 
@@ -66,11 +64,34 @@ var addContents = function (){
     contentObjArray.push(contentObj = {
         h1: "Finish",
         h2: "Please enter initial",
-        choices: ["Submit"],
-        answer: 0,
+        answerPair: [["Submit", true]],
         inputField: true
     });
+}
 
+// Fisher–Yates shuffle
+var shuffle = function(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+  
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+  
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+  
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+  
+    return array;
+}
+
+var updateCountAndIndex = function() {
+    endIndex = contentObjArray.length - 1;
+    questionTotalCount = contentObjArray.length - 2;
 }
 
 var saveScoresToLocal = function() {
@@ -96,6 +117,12 @@ var removeElement = function (pageSectionEl, element){
 }
 
 var updatePage = function(contentObj) {
+    debugger;
+
+    if(contentObj === null){
+        console.log("contentObj is null");
+        return false;
+    }
     var pageSectionEl = document.querySelector("#quiz");
 
     // remove previous addon elements
@@ -123,17 +150,25 @@ var updatePage = function(contentObj) {
         document.getElementById("initial-input").focus();
     }
 
+    if(currentState != 0 && currentState != endIndex){
+        // randomize answer order
+        shuffle(contentObj.answerPair);
+    }    
+
     // add buttons of choices
-    for(var i = 0; i < contentObj.choices.length; i++){
+    for(var i = 0; i < contentObj.answerPair.length; i++){
         var buttonEl = document.createElement("button");
-        buttonEl.textContent = contentObj.choices[i];
+        buttonEl.textContent = contentObj.answerPair[i][0];
         buttonEl.className = "choice";
         buttonEl.setAttribute("choice-id", i);
 
         pageSectionEl.appendChild(buttonEl);
-    }
 
-    answer = contentObj.answer;
+        if(contentObj.answerPair[i][1] == true){
+            answer = i;
+        }
+        // debugger;
+    }   
 }
 
 var updateFeedback = function(feedback) {
@@ -163,6 +198,7 @@ var saveHighscore = function () {
 
     var currentAttempt = {
         timeStamp: Date.now(),
+        timeUsed: totalTimeUsed,
         initial: initial_inputBox,
         score: correctCount
     }
@@ -183,7 +219,12 @@ var saveHighscore = function () {
                 break;
             }
             // splice score if same score is found and timestamp is larger
-            else if(highscore[i].score == currentAttempt.score && highscore[i].timeStamp > currentAttempt.timeStamp){   
+            else if(highscore[i].score == currentAttempt.score && highscore[i].timeUsed > currentAttempt.timeUsed){   
+                highscore.splice(i, 0, currentAttempt);
+                break;
+            }
+            // splice score if same score is found and timestamp is larger
+            else if(highscore[i].score == currentAttempt.score && highscore[i].timeUsed == currentAttempt.timeUsed && highscore[i].timeStamp > currentAttempt.timeStamp){   
                 highscore.splice(i, 0, currentAttempt);
                 break;
             }
@@ -225,6 +266,7 @@ var validateChoice = function (choiceId) {
 
 var stopTimerWhenFinished = function () {
     if(currentState == endIndex - 1){
+        totalTimeUsed = questionTotalCount * quizTimeMultiplier - timeRemaining;
         clearInterval(myTimer);
     }
 }
@@ -233,7 +275,7 @@ var displayEndMessage = function (){
     contentObjArray[currentState].h2 = "You answered " 
     + correctCount 
     + " out of " 
-    + (endIndex - 1) 
+    + questionTotalCount
     + " questions correct. Please enter initial.";
 }
 
@@ -261,6 +303,16 @@ var changeState = function() {
         resetQuiz();
     }
 }
+
+var randomizeQuestionOrder = function() {
+    shuffle(contentObjArray);
+
+    // add question numbering to h1
+    for(var i = 0; i < contentObjArray.length; i++){
+        contentObjArray[i].h1 = "Question " + (i+1) + ":";
+    }
+}
+
 var quizButtonClickHandler = async function(event) {
     debugger;
     
@@ -282,10 +334,11 @@ var quizButtonClickHandler = async function(event) {
             startTimer();
             changeState();
             updatePage(contentObjArray[currentState]);
+            questionCounter++;
         }
         else if(currentState != 0 && currentState != endIndex){
             validateChoice(choiceId);
-            stopTimerWhenFinished(endIndex);
+            stopTimerWhenFinished();
             
             buttonActive = false;
             await new Promise(r => setTimeout(r, 1500));
@@ -304,7 +357,7 @@ var quizButtonClickHandler = async function(event) {
 }
 
 var submitHandler = function () {
-    debugger;
+    // debugger;
     event.preventDefault();
     if(currentState == endIndex){
         if(finishQuiz()){
@@ -343,7 +396,7 @@ var timerCheck = function () {
         clearInterval(myTimer);
         currentState = contentObjArray.length - 1;
         contentObjArray[currentState].h2 = "Timer is up. You answered " + correctCount + " out of " + (currentState - 1) + " questions correct. Please enter initial.";
-        updatePage(contentObjArray[currentState]);
+        updatePage(contentObjArray[endIndex]);
     }
 }
 
@@ -359,11 +412,17 @@ var startTimer =  function () {
     myTimer = setInterval(timerHandle, 1000);
 }
 
+var showQuizStartPage = function() {
+    updatePage(contentObjArray[0]); // show quiz start page
+}
+
 loadScoresFromLocal();
 updateHighscoreTable();
 addContents();
-endIndex = contentObjArray.length - 1;
-updatePage(contentObjArray[0]); // show quiz start page
+randomizeQuestionOrder();
+addStartAndEndPage();
+updateCountAndIndex();
+showQuizStartPage();
 
 // event listeners
 quizContentEl.addEventListener("click", quizButtonClickHandler);
