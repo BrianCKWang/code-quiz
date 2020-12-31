@@ -38,15 +38,36 @@ var addContents = function (){
 
     contentObjArray.push(contentObj = {
         h1: "",
-        h2: "Value in a variable cannot be changed.",
-        answerPair: [["False", true], ["True", false]],
+        h2: "Math.random() returns a value between 0 and 1.",
+        answerPair: [["True", true], ["false", false]],
         inputField: false
     });
-    
+
     contentObjArray.push(contentObj = {
         h1: "",
-        h2: "Value in a variable cannot be changed.",
-        answerPair: [["False", true], ["True", false]],
+        h2: "Which one is not a JavaScript date type?",
+        answerPair: [["header", true], ["Number", false], ["boolean", false], ["String", false]],
+        inputField: false
+    });
+
+    contentObjArray.push(contentObj = {
+        h1: "",
+        h2: "Which symbol is used to comment a single line in JavaScript?",
+        answerPair: [["//", true], ["{}", false], ["<>", false], ["??", false]],
+        inputField: false
+    });
+
+    contentObjArray.push(contentObj = {
+        h1: "",
+        h2: "JavaScript is case sensitive.",
+        answerPair: [["True", true], ["False", false]],
+        inputField: false
+    });
+
+    contentObjArray.push(contentObj = {
+        h1: "",
+        h2: "What is the result of 4+3+\"7\"",
+        answerPair: [["77", true], ["14", false], ["17", false], ["437", false]],
         inputField: false
     });
 }
