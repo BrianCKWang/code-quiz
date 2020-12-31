@@ -304,7 +304,7 @@ var displayEndMessage = function (){
     + correctCount 
     + " out of " 
     + questionTotalCount
-    + " questions correct. Please enter initial.";
+    + " questions correctly. Please enter initial.";
 }
 
 var resetQuiz = function () {
@@ -422,7 +422,7 @@ var timerCheck = function () {
     if(timeRemaining == 0){
         clearInterval(myTimer);
         currentState = contentObjArray.length - 1;
-        contentObjArray[currentState].h2 = "Timer is up. You answered " + correctCount + " out of " + (currentState - 1) + " questions correct. Please enter initial.";
+        contentObjArray[currentState].h2 = "Timer is up. You answered " + correctCount + " out of " + (currentState - 1) + " questions correctly. Please enter initial.";
         updatePage(contentObjArray[endIndex]);
     }
 }
